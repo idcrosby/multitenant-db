@@ -98,7 +98,7 @@ Another solution to the cost problem is to opt for a serverless option. In his o
 
 "Today we have huge clouds offering cheap infrastructure and tooling for automatic scaling in and out, creating new instances and tearing them down again without any of the manual interventions that used to be necessary. There are new services popping up every day, like databases being charged per transaction rather than per instance, which means you do not have to pay in the event the tenant is not using the database. [...] The economic necessity for multi-tenancy at the application tier has gone away."
 
-Granted, the cloud services pricing landscape has greatly evolved over the last decade, but the fact is, so has the application market. Nowadays, non-enterprise applications sell at a fraction of what applications used to cost, with most prices ranging between $0.99 and $15.99 monthly. With this price range, you simply cannot afford a database that costs $14.40 per month _per user_ (AWS RDS, db.t3.micro, smallest at a rate of $0.02 per hour).
+Granted, the cloud services pricing landscape has greatly evolved over the last decade, but the fact is, so has the application market. Nowadays, non-enterprise applications sell at a fraction of what applications used to cost, with most prices ranging between $0.99 and $15.99 monthly. With this price range, you simply cannot afford a database that costs $14.40 per month _per tenant_ (AWS RDS, db.t3.micro, smallest at a rate of $0.02 per hour).
 
 "But what about serverless?" says the SF trendy tech hipster.
 
@@ -118,7 +118,7 @@ In summary, the Database-Per-Tenant Multitenancy model is the simplest to implem
 
 Single-schema single-instance multitenancy (SS-SI) is the most common type of multitenancy. As explained above, it is the default mode of multitenancy that most applications use to reduce the cost-per-tenant. It is the cheapest option as you only need to have a single instance running and scale according to your load and storage needs. However this comes at the cost of isolation, for this is the model with the least physical and logical isolation of all the models. 
 
-In this model, your users all share the same tables, with their records intertwining between each other. The discriminant factor is a column that is common to all tables and that specifies the unique identifier of each tenant. A single-schema single-instance database looks like the following:
+In this model, your tenants all share the same tables, with their records intertwining between each other. The discriminant factor is a column that is common to all tables and that specifies the unique identifier of each tenant. A single-schema single-instance database looks like the following:
 
 <TODO: Insert image here>
 
@@ -130,7 +130,7 @@ Single-schema single-instance multitenancy also improves the data schema migrati
 
 This model is not all flowers and rainbows (rainbows! 🌈) however, as it makes it harder for about every other aspect of development, operationability, debuggability and data governance. For one, it makes it much harder to create setups where different clients may have different versions of the data schema running in the database. Second, it makes virtually all single-tenant operations like restoring data, purging data, extracting data for audits and exports much harder than the Database-Per-Tenant approach. Restoring previous version is especially a nightmare if there is no immutable data store from which to backfill because you can't simply rollback your instance to a previous snapshot in time without affecting your other tenants.
 
-Both single-schema single-instance multitenancy and multiple-schema single-instance multitenancy come with an other, generally less well known issue: resource sharing. Contrarily to the Database-Per-Tenant model, given that all of your users share common resources, if some of them hoard or abuse the said resources, other users' service quality may drastically drop.
+Both single-schema single-instance multitenancy and multiple-schema single-instance multitenancy come with an other, generally less well known issue: resource sharing. Contrarily to the Database-Per-Tenant model, given that all of your tenants share common resources, if some of them hoard or abuse the said resources, other tenants' service quality may drastically drop.
 
 Horizontal scaling can be approached by sharding your dataset according to the values in the tenant identification column. As to whether scaling and sharding your database can affect the ability of the setup to perform market-wide analytics, I (@philippefutureboy) do not know sufficiently on the subject to give you an answer. It is very likely that a solution like duplication of market-wide preaggregated, larger grained tables across all the shards may solve the problem. If you know more about sharding and query performance, feel free to let us know in the comments or to contribute to the repository 🚀
 
